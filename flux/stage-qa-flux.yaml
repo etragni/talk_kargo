@@ -1,0 +1,85 @@
+# ── qa-flux ──────────────────────────────────────────────────────────────────
+# Same Warehouse, same Freight, same pipeline. Different GitOps agent.
+# This Stage never talks to Argo CD: it writes the rendered manifests to
+# Git and lets Flux reconcile them.
+#
+# REPLACE_WITH_WEBHOOK_PATH is substituted at apply time (guide, step 9):
+#   sed "s#REPLACE_WITH_WEBHOOK_PATH#$HOOK#" flux/stage-qa-flux.yaml | kubectl apply -f -
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Stage
+metadata:
+  name: qa-flux
+  namespace: kargo-demo
+spec:
+  requestedFreight:
+    - origin:
+        kind: Warehouse
+        name: demo-warehouse
+      sources:
+        stages: [dev]   # only Freight that passed dev, exactly like staging
+  promotionTemplate:
+    spec:
+      vars:
+        - name: repoURL
+          value: https://github.com/etragni/talk_kargo
+        - name: imageRepo
+          value: ghcr.io/etragni/kargo-demo-app
+      steps:
+        # 1. Two working trees: main (source overlays) and the stage branch (output)
+        - uses: git-clone
+          config:
+            repoURL: ${{ vars.repoURL }}
+            checkout:
+              - branch: main
+                path: ./src
+              - branch: stage/qa-flux
+                create: true          # orphan branch is created on first promotion
+                path: ./out
+
+        - uses: git-clear
+          config:
+            path: ./out
+
+        # 2. Pin the image by digest, never by tag
+        - uses: kustomize-set-image
+          as: update-image
+          config:
+            path: ./src/manifests/flux
+            images:
+              - image: ${{ vars.imageRepo }}
+                digest: ${{ imageFrom(vars.imageRepo).Digest }}
+
+        # 3. Render plain YAML: what Flux deploys is exactly what is in Git
+        - uses: kustomize-build
+          config:
+            path: ./src/manifests/flux
+            outPath: ./out/manifests.yaml
+
+        - uses: git-commit
+          as: commit
+          config:
+            path: ./out
+            message: ${{ outputs['update-image'].commitMessage }}
+
+        - uses: git-push
+          config:
+            path: ./out
+
+        # 4. Nudge Flux so the demo does not wait for the 1m poll interval
+        - uses: http
+          as: flux-reconcile
+          config:
+            method: POST
+            url: http://webhook-receiver.flux-system.svc.cluster.local/hook/REPLACE_WITH_WEBHOOK_PATH
+            successExpression: response.status == 200
+          retry:
+            timeout: 1m
+
+        # 5. Wait until the Flux-deployed app answers (polls until success)
+        - uses: http
+          as: wait-healthy
+          config:
+            url: http://flux-demo-app.demo-flux.svc.cluster.local/health
+            successExpression: response.status == 200
+          retry:
+            timeout: 3m

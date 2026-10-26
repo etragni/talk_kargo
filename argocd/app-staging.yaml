@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/etragni/voxxed_days_lux_2026
+    repoURL: https://github.com/etragni/talk_kargo
     targetRevision: HEAD
     path: manifests/staging
   destination:

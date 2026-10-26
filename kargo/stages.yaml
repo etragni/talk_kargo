@@ -22,7 +22,7 @@ spec:
               - name: demo-dev
                 namespace: argocd
                 sources:
-                  - repoURL: https://github.com/etragni/voxxed_days_lux_2026
+                  - repoURL: https://github.com/etragni/talk_kargo
                     kustomize:
                       images:
                         - repoURL: ghcr.io/etragni/kargo-demo-app
@@ -67,7 +67,7 @@ spec:
               - name: demo-staging
                 namespace: argocd
                 sources:
-                  - repoURL: https://github.com/etragni/voxxed_days_lux_2026
+                  - repoURL: https://github.com/etragni/talk_kargo
                     kustomize:
                       images:
                         - repoURL: ghcr.io/etragni/kargo-demo-app
@@ -117,7 +117,7 @@ spec:
               - name: demo-prod
                 namespace: argocd
                 sources:
-                  - repoURL: https://github.com/etragni/voxxed_days_lux_2026
+                  - repoURL: https://github.com/etragni/talk_kargo
                     kustomize:
                       images:
                         - repoURL: ghcr.io/etragni/kargo-demo-app

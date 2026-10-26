@@ -1,0 +1,28 @@
+# Auto-promotion policy for the whole project.
+# Policies for Stages that do not exist yet (qa-flux, prod-eu, prod-us) are
+# harmless and take effect as soon as those Stages are created.
+apiVersion: kargo.akuity.io/v1alpha1
+kind: ProjectConfig
+metadata:
+  name: kargo-demo
+  namespace: kargo-demo
+spec:
+  promotionPolicies:
+    - stageSelector:
+        name: dev
+      autoPromotionEnabled: true
+    - stageSelector:
+        name: staging
+      autoPromotionEnabled: true
+    - stageSelector:
+        name: qa-flux
+      autoPromotionEnabled: true
+    - stageSelector:
+        name: prod
+      autoPromotionEnabled: false   # a human with `promote` on stages/prod decides
+    - stageSelector:
+        name: prod-eu
+      autoPromotionEnabled: true
+    - stageSelector:
+        name: prod-us
+      autoPromotionEnabled: true

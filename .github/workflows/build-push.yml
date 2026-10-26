@@ -3,6 +3,11 @@ name: Build and Push
 on:
   push:
     branches: [main]
+    # Only rebuild when the app changes. Manifest or docs commits must not
+    # create new Freight (and Kargo's pushes to stage/* never trigger CI).
+    paths:
+      - 'app/**'
+  workflow_dispatch:
 
 jobs:
   build:

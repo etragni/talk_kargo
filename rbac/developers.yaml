@@ -1,0 +1,56 @@
+# ── Developers: may promote into dev, staging and qa-flux. Never prod. ──────
+# Users are matched by their OIDC `groups` claim. Without OIDC (as in the
+# demo) you can still test the rules by impersonating the ServiceAccount:
+#   kubectl auth can-i promote stages/prod -n kargo-demo \
+#     --as system:serviceaccount:kargo-demo:dev-promoter
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dev-promoter
+  namespace: kargo-demo
+  annotations:
+    kargo.akuity.io/description: Developers, may promote into pre-prod Stages
+    rbac.kargo.akuity.io/claims: '{"groups":["developers"]}'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: dev-promoter
+  namespace: kargo-demo
+rules:
+  - apiGroups: [kargo.akuity.io]
+    resources: [promotions]
+    verbs: [create, patch, update]
+  - apiGroups: [kargo.akuity.io]
+    resources: [stages]
+    verbs: [promote]                         # Kargo's custom verb
+    resourceNames: [dev, staging, qa-flux]   # prod is simply not listed
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dev-promoter
+  namespace: kargo-demo
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: dev-promoter
+subjects:
+  - kind: ServiceAccount
+    name: dev-promoter
+    namespace: kargo-demo
+---
+# Reuse the built-in read-only role instead of redefining read rules
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dev-promoter-viewer
+  namespace: kargo-demo
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kargo-viewer
+subjects:
+  - kind: ServiceAccount
+    name: dev-promoter
+    namespace: kargo-demo

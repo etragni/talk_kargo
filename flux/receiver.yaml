@@ -1,0 +1,16 @@
+# ── Flux: instant reconcile instead of waiting for the poll interval ────────
+# Kargo calls this webhook from an `http` promotion step right after
+# `git-push`. Create the token secret first (see kargo-demo-guide.md, step 9).
+apiVersion: notification.toolkit.fluxcd.io/v1
+kind: Receiver
+metadata:
+  name: kargo
+  namespace: flux-system
+spec:
+  type: generic
+  secretRef:
+    name: kargo-receiver-token
+  resources:
+    - apiVersion: source.toolkit.fluxcd.io/v1
+      kind: GitRepository
+      name: talk-kargo-qa-flux

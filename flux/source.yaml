@@ -1,0 +1,30 @@
+# ── Flux: what to deploy ─────────────────────────────────────────────────────
+# Flux watches the branch that Kargo writes to. It knows nothing about
+# Freight, Stages or approvals: it just reconciles whatever lands in Git.
+# Note: the branch only exists after the first qa-flux promotion, so this
+# GitRepository reports "not ready" until then. That is expected.
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: talk-kargo-qa-flux
+  namespace: flux-system
+spec:
+  interval: 1m
+  url: https://github.com/etragni/talk_kargo
+  ref:
+    branch: stage/qa-flux
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: demo-qa-flux
+  namespace: flux-system
+spec:
+  interval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: talk-kargo-qa-flux
+  path: ./
+  prune: true
+  wait: true          # Ready only once the Deployment is rolled out
+  timeout: 3m

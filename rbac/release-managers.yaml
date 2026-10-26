@@ -1,0 +1,25 @@
+# ── Release managers: may promote into every Stage, including prod ──────────
+# Bound to the built-in `kargo-promoter` role: they can promote and approve,
+# but cannot create, edit or delete Warehouses or Stages.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: release-manager
+  namespace: kargo-demo
+  annotations:
+    kargo.akuity.io/description: Release managers, may promote into any Stage
+    rbac.kargo.akuity.io/claims: '{"groups":["release-managers"]}'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: release-manager
+  namespace: kargo-demo
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kargo-promoter
+subjects:
+  - kind: ServiceAccount
+    name: release-manager
+    namespace: kargo-demo

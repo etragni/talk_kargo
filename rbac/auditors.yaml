@@ -1,0 +1,23 @@
+# ── Auditors: see everything, change nothing ────────────────────────────────
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: auditor
+  namespace: kargo-demo
+  annotations:
+    kargo.akuity.io/description: Auditors, read-only
+    rbac.kargo.akuity.io/claims: '{"groups":["auditors"]}'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: auditor
+  namespace: kargo-demo
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kargo-viewer
+subjects:
+  - kind: ServiceAccount
+    name: auditor
+    namespace: kargo-demo
