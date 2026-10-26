@@ -3,7 +3,6 @@
 Demo repository for the talk **"GitOps is not enough: taming environment promotion in Kubernetes with Kargo"**
 
 Presented at [Voxxed Days Luxembourg](https://voxxeddays.com/luxembourg/) and Dutch Cloud Native Day (Utrecht, 2026).
-The full step-by-step demo script is in [`kargo-demo-guide.md`](kargo-demo-guide.md).
 
 ---
 
