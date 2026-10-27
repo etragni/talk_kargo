@@ -9,6 +9,22 @@ metadata:
   annotations:
     kargo.akuity.io/description: Release managers, may promote into any Stage
     rbac.kargo.akuity.io/claims: '{"groups":["release-managers"]}'
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kargo-promoter
+rules:
+- apiGroups: ["kargo.akuity.io"]
+  resources: ["stages"]
+  verbs: ["get", "list", "watch", "promote"]
+- apiGroups: ["kargo.akuity.io"]
+  resources: ["promotions"]
+  verbs: ["get", "list", "watch", "create"]
+- apiGroups: ["kargo.akuity.io"]
+  resources: ["freights"]
+  verbs: ["get", "list", "watch", "approve"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -17,7 +33,7 @@ metadata:
   namespace: kargo-demo
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
+  kind: ClusterRole
   name: kargo-promoter
 subjects:
   - kind: ServiceAccount

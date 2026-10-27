@@ -82,4 +82,5 @@ spec:
             url: http://flux-demo-app.demo-flux.svc.cluster.local/health
             successExpression: response.status == 200
           retry:
+            errorThreshold: 0
             timeout: 3m
