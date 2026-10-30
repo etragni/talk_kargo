@@ -9,7 +9,7 @@ import (
 func main() {
 	version := os.Getenv("APP_VERSION")
 	if version == "" {
-		version = "v1.1029.0905"
+		version = "v1.1030.1202"
 	}
 
 	// DEMO HOOK: set FORCE_ERROR=true to simulate a broken release
